@@ -1,5 +1,5 @@
 class authController {
-  admin_page = async (req, res) => {
+  admin_login = async (req, res) => {
     console.log(req.body);
   };
 }
