@@ -33,6 +33,26 @@ class AuthController {
       console.error('Error during admin login:', error);
       responseReturn(res, 500, { error: 'An error occurred during login' });
     }
-  };
+  }; // End of admin_login
+  getUser = async (req, res) => {
+    const { id, role } = req;
+    try {
+      if (role === 'admin') {
+        const user = await adminModel.findById(id);
+        if (user) {
+          responseReturn(res, 200, { userInfo: user });
+        } else {
+          responseReturn(res, 404, { error: 'User not found' });
+        }
+      } else {
+        console.log('Vendor Info');
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      responseReturn(res, 500, {
+        error: 'An error occurred while fetching user data',
+      });
+    }
+  }; // End of getUser
 }
 module.exports = new AuthController();
