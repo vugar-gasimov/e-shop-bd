@@ -19,7 +19,10 @@ class AuthController {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true, // Added for security
           });
-          return responseReturn(res, 200, { token, message: 'Login success' });
+          return responseReturn(res, 200, {
+            token,
+            message: 'Login successful',
+          });
         } else {
           return responseReturn(res, 401, { error: 'Wrong password' });
         }
