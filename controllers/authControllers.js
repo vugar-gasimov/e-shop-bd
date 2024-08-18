@@ -3,6 +3,8 @@ const vendorModel = require('../models/vendorModel');
 const { responseReturn } = require('../utils/response');
 const bcrypt = require('bcrypt');
 const { createToken } = require('../utils/tokenCreate');
+const vendorCustomersModel = require('../models/chat/vendorCustomersModel');
+
 class authControllers {
   admin_login = async (req, res) => {
     const { email, password } = req.body;
@@ -50,10 +52,23 @@ class authControllers {
           method: 'manually',
           shopInfo: {},
         });
-        console.log(vendor);
+        await vendorCustomersModel.create({ myId: vendor.id });
+        const token = await createToken({
+          id: vendor.id,
+          role: vendor.role,
+        });
+
+        res.cookie('accessToken', token, {
+          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+
+        responseReturn(res, 201, {
+          token,
+          message: 'Registered successfully.',
+        });
       }
     } catch (error) {
-      console.log(error);
+      responseReturn(res, 500, { error: 'Internal server error.' });
     }
   }; // End of vendor_register
 

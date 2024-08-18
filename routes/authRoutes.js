@@ -6,6 +6,7 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 const router = require('express').Router();
 
 router.post('/admin-login', authControllers.admin_login);
+router.post('/vendor-login', authControllers.vendor_login);
 router.get('/get-user', authMiddleware, authControllers.getUser);
 router.post('/vendor-register', authControllers.vendor_register);
 
