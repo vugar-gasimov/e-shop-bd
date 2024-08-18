@@ -1,8 +1,9 @@
 const adminModel = require('../models/adminModel');
+const vendorModel = require('../models/vendorModel');
 const { responseReturn } = require('../utils/response');
 const bcrypt = require('bcrypt');
 const { createToken } = require('../utils/tokenCreate');
-class AuthController {
+class authControllers {
   admin_login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -19,21 +20,43 @@ class AuthController {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             httpOnly: true, // Added for security
           });
-          return responseReturn(res, 200, {
+          responseReturn(res, 200, {
             token,
             message: 'Login successful',
           });
         } else {
-          return responseReturn(res, 401, { error: 'Wrong password' });
+          responseReturn(res, 401, { error: 'Wrong password' });
         }
       } else {
-        return responseReturn(res, 404, { error: 'Admin not found' });
+        responseReturn(res, 404, { error: 'Admin not found' });
       }
     } catch (error) {
       console.error('Error during admin login:', error);
       responseReturn(res, 500, { error: 'An error occurred during login' });
     }
   }; // End of admin_login
+
+  vendor_register = async (req, res) => {
+    const { email, name, password } = req.body;
+    try {
+      const getUser = await vendorModel.findOne({ email });
+      if (getUser) {
+        responseReturn(res, 404, { error: 'Email already exists' });
+      } else {
+        const vendor = await vendorModel.create({
+          name,
+          email,
+          password: await bcrypt.hash(password, 10),
+          method: 'manually',
+          shopInfo: {},
+        });
+        console.log(vendor);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }; // End of vendor_register
+
   getUser = async (req, res) => {
     const { id, role } = req;
     try {
@@ -55,4 +78,4 @@ class AuthController {
     }
   }; // End of getUser
 }
-module.exports = new AuthController();
+module.exports = new authControllers();
