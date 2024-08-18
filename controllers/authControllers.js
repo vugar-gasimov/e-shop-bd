@@ -38,6 +38,38 @@ class authControllers {
     }
   }; // End of admin_login
 
+  vendor_login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const vendor = await vendorModel.findOne({ email }).select('+password');
+
+      if (vendor) {
+        const match = await bcrypt.compare(password, vendor.password);
+        if (match) {
+          const token = await createToken({
+            id: vendor.id,
+            role: vendor.role,
+          });
+          res.cookie('accessToken', token, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true, // Added for security
+          });
+          responseReturn(res, 200, {
+            token,
+            message: 'Login successful',
+          });
+        } else {
+          responseReturn(res, 401, { error: 'Wrong password' });
+        }
+      } else {
+        responseReturn(res, 404, { error: 'Vendor not found' });
+      }
+    } catch (error) {
+      console.error('Error during vendor login:', error);
+      responseReturn(res, 500, { error: 'An error occurred during login' });
+    }
+  }; // End of vendor_login
+
   vendor_register = async (req, res) => {
     const { email, name, password } = req.body;
     try {
