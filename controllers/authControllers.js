@@ -109,16 +109,12 @@ class authControllers {
     try {
       if (role === 'admin') {
         const user = await adminModel.findById(id);
-        if (user) {
-          responseReturn(res, 200, { userInfo: user });
-        } else {
-          responseReturn(res, 404, { error: 'User not found' });
-        }
+        responseReturn(res, 200, { userInfo: user });
       } else {
-        console.log('Vendor Info');
+        const vendor = await vendorModel.findById(id);
+        responseReturn(res, 200, { userInfo: vendor });
       }
     } catch (error) {
-      console.error('Error fetching user:', error);
       responseReturn(res, 500, {
         error: 'An error occurred while fetching user data',
       });
