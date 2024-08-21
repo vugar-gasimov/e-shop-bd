@@ -3,8 +3,9 @@ const { responseReturn } = require('../../utils/response');
 const cloudinary = require('cloudinary').v2;
 const categoryModel = require('../../models/categoryModel');
 class categoryController {
-  addCategory = async (req, res) => {
+  add_category = async (req, res) => {
     const form = formidable();
+    // const form = new formidable.IncomingForm();
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -14,7 +15,7 @@ class categoryController {
         let { image } = files;
 
         name = name.trim();
-        const slug = name.split('').join('-');
+        const slug = name.split(' ').join('-');
 
         cloudinary.config({
           cloud_name: process.env.CLOUD_NAME,
@@ -30,8 +31,8 @@ class categoryController {
           if (result) {
             const category = await categoryModel.create({
               name,
-              image: result.url,
               slug,
+              image: result.url,
             });
             responseReturn(res, 201, {
               category,

@@ -5,7 +5,7 @@ const categoryController = require('../../controllers/dashboard/categoryControll
 
 const router = require('express').Router();
 
-router.post('/add-category', authMiddleware, categoryController.addCategory);
+router.post('/add-category', authMiddleware, categoryController.add_category);
 
 router.get(
   '/get-category-info',
