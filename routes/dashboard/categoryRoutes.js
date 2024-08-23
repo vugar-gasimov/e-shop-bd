@@ -7,10 +7,6 @@ const router = require('express').Router();
 
 router.post('/add-category', authMiddleware, categoryController.add_category);
 
-router.get(
-  '/get-category-info',
-  authMiddleware,
-  categoryController.getCategory
-);
+router.get('/get-categories', authMiddleware, categoryController.getCategories);
 
 module.exports = router;
