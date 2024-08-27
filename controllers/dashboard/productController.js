@@ -30,7 +30,9 @@ class productController {
       price = parseInt(price);
       discount = parseInt(discount);
       const slug = name.split(' ').join('-');
-
+      if (isNaN(discount)) {
+        discount = 0;
+      }
       cloudinary.config({
         cloud_name: process.env.CLOUD_NAME,
         api_key: process.env.CLOUD_API_KEY,
