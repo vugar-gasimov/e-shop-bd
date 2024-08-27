@@ -4,9 +4,13 @@ const cloudinary = require('cloudinary').v2;
 const productModel = require('../../models/productModel');
 class productController {
   add_product = async (req, res) => {
+    const { id } = req;
     const form = formidable({ multiples: true });
 
     form.parse(req, async (err, field, files) => {
+      if (err) {
+        responseReturn(res, 400, { error: 'Form parsing error' });
+      }
       let {
         name,
         category,
@@ -17,8 +21,14 @@ class productController {
         shopName,
         brand,
       } = field;
-      const { images } = files;
-      name = name.trim();
+      let { images } = files;
+      name = name?.toString().trim();
+      category = category?.toString().trim();
+      description = description?.toString().trim();
+      brand = brand?.toString().trim();
+      stock = parseInt(stock);
+      price = parseInt(price);
+      discount = parseInt(discount);
       const slug = name.split(' ').join('-');
 
       cloudinary.config({
@@ -30,14 +40,44 @@ class productController {
 
       try {
         let allImageUrls = [];
-        for (let i = 0; i < images.length; i++) {
-          const result = await cloudinary.uploader.upload(images[i].filepath, {
-            folder: 'products',
-          });
-          allImageUrls = [...allImageUrls, result.url];
+
+        if (images) {
+          if (!Array.isArray(images)) {
+            images = [images];
+          }
+
+          const uploadPromises = images.map((image) =>
+            cloudinary.uploader.upload(image.filepath, {
+              folder: 'products',
+            })
+          );
+
+          const uploadResults = await Promise.all(uploadPromises);
+          allImageUrls = uploadResults.map((result) => result.url);
         }
-        await productModel.create;
-      } catch (error) {}
+
+        await productModel.create({
+          vendorId: id,
+          name,
+          slug,
+          shopName,
+          category,
+          description,
+          brand,
+          stock,
+          price,
+          discount,
+          images: allImageUrls,
+        });
+        responseReturn(res, 201, {
+          message: "Product successfully added '201'.",
+        });
+      } catch (error) {
+        console.error(error);
+        responseReturn(res, 500, {
+          error: "Internal server error during 'Product adding 500'.",
+        });
+      }
     });
   }; // End of add product method
 }
