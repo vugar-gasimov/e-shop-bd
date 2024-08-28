@@ -82,6 +82,58 @@ class productController {
       }
     });
   }; // End of add product method
+
+  get_products = async (req, res) => {
+    const { page, searchValue, perPage } = req.query;
+
+    const { id } = req;
+    let skipPage = '';
+    skipPage = parseInt(perPage) * (parseInt(page) - 1);
+
+    try {
+      let products, totalProducts;
+      if (searchValue) {
+        const products = await productModel
+          .find({
+            $text: { $search: searchValue },
+            vendorId: id,
+          })
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+        const totalProducts = await productModel
+          .find({
+            $text: { $search: searchValue },
+            vendorId: id,
+          })
+          .countDocuments();
+        responseReturn(res, 201, {
+          products,
+          totalProducts,
+          message: 'Products retrieved successfully.',
+        });
+      } else {
+        const products = await productModel
+          .find({ vendorId: id })
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+        const totalProducts = await productModel
+          .find({ vendorId: id })
+          .countDocuments();
+        responseReturn(res, 201, {
+          products,
+          totalProducts,
+          message: 'Products retrieved successfully.',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      responseReturn(res, 500, {
+        error: 'Internal server error during product retrieval.',
+      });
+    }
+  }; // End of get products method
 }
 
 module.exports = new productController();
