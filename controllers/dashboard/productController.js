@@ -134,6 +134,62 @@ class productController {
       });
     }
   }; // End of get products method
+
+  get_product = async (req, res) => {
+    const { productId } = req.params;
+
+    try {
+      const product = await productModel.findById(productId);
+
+      responseReturn(res, 201, {
+        product,
+        message: 'Product retrieved successfully.',
+      });
+    } catch (error) {
+      console.error(error);
+      responseReturn(res, 500, {
+        error: 'Internal server error during product retrieval.',
+      });
+    }
+  }; // End of get product with id method
+
+  edit_product = async (req, res) => {
+    let { name, description, stock, price, discount, brand, productId } =
+      req.body;
+
+    if (!productId) {
+      responseReturn(res, 400, { error: 'Product ID is required.' });
+    }
+
+    name = name?.toString().trim();
+    const slug = name.split(' ').join('-');
+
+    try {
+      await productModel.findByIdAndUpdate(productId, {
+        name,
+        description,
+        stock,
+        price,
+        discount,
+        brand,
+        productId,
+        slug,
+      });
+      const product = await productModel.findById(productId);
+      if (!product) {
+        responseReturn(res, 404, { error: 'Product not found.' });
+      }
+      responseReturn(res, 201, {
+        product,
+        message: 'Product updated successfully.',
+      });
+    } catch (error) {
+      console.error(error);
+      responseReturn(res, 500, {
+        error: 'Internal server error during product update.',
+      });
+    }
+  }; // End of edit product with id method
 }
 
 module.exports = new productController();
