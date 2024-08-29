@@ -9,5 +9,6 @@ router.post('/admin-login', authControllers.admin_login);
 router.post('/vendor-login', authControllers.vendor_login);
 router.get('/get-user-info', authMiddleware, authControllers.getUser);
 router.post('/vendor-register', authControllers.vendor_register);
+router.post('/upload-image', authMiddleware, authControllers.uploadImage);
 
 module.exports = router;

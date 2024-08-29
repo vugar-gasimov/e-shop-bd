@@ -4,6 +4,8 @@ const { responseReturn } = require('../utils/response');
 const bcrypt = require('bcrypt');
 const { createToken } = require('../utils/tokenCreate');
 const vendorCustomersModel = require('../models/chat/vendorCustomersModel');
+const cloudinary = require('cloudinary').v2;
+const { formidable } = require('formidable');
 
 class authControllers {
   admin_login = async (req, res) => {
@@ -120,5 +122,52 @@ class authControllers {
       });
     }
   }; // End of getUser
+
+  uploadImage = async (req, res) => {
+    const { id } = req;
+    const form = formidable({ multiples: false });
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        return responseReturn(res, 400, { error: 'Form parsing error' });
+      }
+
+      const { image } = files;
+
+      if (!image) {
+        return responseReturn(res, 400, { error: 'No image file provided' });
+      }
+
+      try {
+        cloudinary.config({
+          cloud_name: process.env.CLOUD_NAME,
+          api_key: process.env.CLOUD_API_KEY,
+          api_secret: process.env.CLOUD_API_SECRET,
+          secure: true,
+        });
+
+        const result = await cloudinary.uploader.upload(image.filepath, {
+          folder: 'profile-image',
+        });
+
+        if (result) {
+          await vendorModel.findByIdAndUpdate(id, {
+            image: result.url,
+          });
+
+          const userInfo = await vendorModel.findById(id);
+
+          responseReturn(res, 201, {
+            userInfo,
+            message: 'Image uploaded successfully.',
+          });
+        } else {
+          responseReturn(res, 500, { error: 'Image upload failed' });
+        }
+      } catch (error) {
+        console.error(error);
+        responseReturn(res, 500, { error: 'Internal server error' });
+      }
+    });
+  }; // End of upload Image
 }
 module.exports = new authControllers();
