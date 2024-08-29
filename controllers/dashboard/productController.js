@@ -91,7 +91,6 @@ class productController {
     skipPage = parseInt(perPage) * (parseInt(page) - 1);
 
     try {
-      let products, totalProducts;
       if (searchValue) {
         const products = await productModel
           .find({
@@ -190,6 +189,62 @@ class productController {
       });
     }
   }; // End of edit product with id method
+
+  product_image_edit = async (req, res) => {
+    const form = formidable({ multiples: true });
+
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        responseReturn(res, 400, { error: 'Form parsing error' });
+      }
+
+      const { oldImage, productId } = fields;
+      const { newImage } = files;
+
+      if (!oldImage || !newImage || !productId) {
+        responseReturn(res, 400, { error: 'Missing required fields' });
+      }
+
+      if (err) {
+        responseReturn(res, 400, { error: err.message });
+      } else {
+        try {
+          cloudinary.config({
+            cloud_name: process.env.CLOUD_NAME,
+            api_key: process.env.CLOUD_API_KEY,
+            api_secret: process.env.CLOUD_API_SECRET,
+            secure: true,
+          });
+          const result = await cloudinary.uploader.upload(newImage.filepath, {
+            folder: 'products',
+          });
+
+          if (result) {
+            let { images } = await productModel.findById(productId);
+            const index = images.findIndex((img) => img === oldImage);
+            images[index] = result.url;
+            await productModel.findByIdAndUpdate(productId, { images });
+
+            const product = await productModel.findById(productId);
+
+            responseReturn(res, 200, {
+              product,
+              message: 'Image successfully updated',
+            });
+          } else {
+            responseReturn(res, 404, {
+              error: 'Failed to upload new image',
+            });
+          }
+        } catch (error) {
+          console.error(error);
+          responseReturn(res, 500, {
+            error: 'Internal server error during image update',
+          });
+        }
+      }
+    });
+  }; // End of edit product image edit with id method
 }
 
 module.exports = new productController();

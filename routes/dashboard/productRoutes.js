@@ -16,4 +16,10 @@ router.get(
 );
 router.post('/edit-product', authMiddleware, productController.edit_product);
 
+router.post(
+  '/product-image-edit',
+  authMiddleware,
+  productController.product_image_edit
+);
+
 module.exports = router;
