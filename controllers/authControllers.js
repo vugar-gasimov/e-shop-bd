@@ -169,5 +169,29 @@ class authControllers {
       }
     });
   }; // End of upload Image
+
+  addProfileInfo = async (req, res) => {
+    const { division, district, shopName, sub_district } = req.body;
+    const { id } = req;
+
+    try {
+      await vendorModel.findByIdAndUpdate(id, {
+        shopInfo: {
+          shopName,
+          division,
+          district,
+          sub_district,
+        },
+      });
+      const userInfo = await vendorModel.findById(id);
+      responseReturn(res, 201, {
+        userInfo,
+        message: 'Shop information updated successfully.',
+      });
+    } catch (error) {
+      console.error(error);
+      responseReturn(res, 500, { error: 'Internal server error' });
+    }
+  }; // End of add Profile Info method
 }
 module.exports = new authControllers();

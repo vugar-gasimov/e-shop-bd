@@ -10,5 +10,10 @@ router.post('/vendor-login', authControllers.vendor_login);
 router.get('/get-user-info', authMiddleware, authControllers.getUser);
 router.post('/vendor-register', authControllers.vendor_register);
 router.post('/upload-image', authMiddleware, authControllers.uploadImage);
+router.post(
+  '/add-profile-info',
+  authMiddleware,
+  authControllers.addProfileInfo
+);
 
 module.exports = router;
