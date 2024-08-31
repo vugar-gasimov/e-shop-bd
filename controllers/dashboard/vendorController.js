@@ -75,6 +75,33 @@ class vendorController {
       });
     }
   }; // End of get vendors method
+
+  updateVendorStatus = async (req, res) => {
+    const { vendorId, status } = req.body;
+    try {
+      const updatedVendor = await vendorModel.findByIdAndUpdate(
+        vendorId,
+        { status },
+        { new: true }
+      );
+
+      if (!updatedVendor) {
+        return responseReturn(res, 404, {
+          error: 'Vendor not found.',
+        });
+      }
+
+      responseReturn(res, 200, {
+        vendor: updatedVendor,
+        message: 'Vendor status updated successfully.',
+      });
+    } catch (error) {
+      console.error('Error updating vendor status:', error.message);
+      responseReturn(res, 500, {
+        error: 'Internal server error during vendor status update.',
+      });
+    }
+  }; // End of update vendor status method
 }
 
 module.exports = new vendorController();
