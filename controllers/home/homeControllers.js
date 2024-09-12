@@ -1,6 +1,7 @@
 const categoryModel = require('../../models/categoryModel');
 const productModel = require('../../models/productModel');
 const { responseReturn } = require('../../utils/response');
+const queryProducts = require('../../utils/queryProducts');
 
 class homeControllers {
   formateProducts = (products) => {
@@ -120,6 +121,49 @@ class homeControllers {
     }
   };
   // End of get product price range method
+
+  query_products = async (req, res) => {
+    const perPage = 12;
+    req.query.perPage = perPage;
+
+    try {
+      const products = await productModel.find({}).sort({ createdAt: -1 });
+
+      const totalProducts = new queryProducts(products, req.query)
+        .categoryQuery()
+        .ratingQuery()
+        .priceQuery()
+        .searchQuery()
+        .sortByPrice()
+        .productsCount();
+
+      const result = new queryProducts(products, req.query)
+        .categoryQuery()
+        .ratingQuery()
+        .priceQuery()
+        .searchQuery()
+        .sortByPrice()
+        .skip()
+        .limit()
+        .getProducts();
+
+      responseReturn(res, 200, {
+        products: result,
+        totalProducts,
+        perPage,
+        success: true,
+        message: 'Query products fetched successfully',
+      });
+    } catch (error) {
+      console.error('Error fetching query products:', error);
+
+      responseReturn(res, 500, {
+        success: false,
+        message: 'Failed to fetch query products',
+      });
+    }
+  };
+  // End of get query products method
 }
 
 module.exports = new homeControllers();
