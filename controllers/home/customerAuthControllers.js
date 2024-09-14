@@ -12,8 +12,7 @@ class customerAuthControllers {
       const customer = await customerModel.findOne({ email });
       if (customer) {
         responseReturn(res, 409, {
-          success: false,
-          message: 'Email address is already in use.',
+          error: 'Email address is already in use.',
         });
       } else {
         const createdCustomer = await customerModel.create({
@@ -35,8 +34,8 @@ class customerAuthControllers {
         res.cookie('customerToken', token, {
           expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           httpOnly: true,
-          // secure: process.env.NODE_ENV === 'production',
-          // sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
         });
 
         responseReturn(res, 201, {
@@ -46,15 +45,52 @@ class customerAuthControllers {
         });
       }
     } catch (error) {
-      console.error('Error during customer registration:', error);
-
-      responseReturn(res, 500, {
-        success: false,
-        message: 'An error occurred during customer registration',
-      });
+      console.error(error.message);
     }
   };
   // End of post customer register method
+
+  customer_login = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+      const customer = await customerModel
+        .findOne({ email })
+        .select('+password');
+      if (customer) {
+        const isMatch = await bcrypt.compare(password, customer.password);
+        if (isMatch) {
+          const token = await createToken({
+            id: customer.id,
+            name: customer.name,
+            email: customer.email,
+            method: customer.method,
+          });
+          res.cookie('customerToken', token, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+          });
+          responseReturn(res, 200, {
+            token,
+            success: true,
+            message: 'Customer login successful',
+          });
+        } else {
+          responseReturn(res, 401, {
+            error: 'Incorrect password.',
+          });
+        }
+      } else {
+        responseReturn(res, 409, {
+          error: 'Email address does not exist.',
+        });
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  // End of post customer login method
 }
 
 module.exports = new customerAuthControllers();
