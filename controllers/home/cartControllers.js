@@ -1,6 +1,8 @@
 const cartModel = require('../../models/cartModel');
 const { responseReturn } = require('../../utils/response');
-
+const {
+  mongo: { ObjectId },
+} = require('mongoose');
 class cartControllers {
   add_to_cart = async (req, res) => {
     const { userId, productId, quantity } = req.body;
@@ -45,6 +47,44 @@ class cartControllers {
       console.log(error.message);
     }
   }; // End of add to cart method
+
+  get_cart_products = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+      const cart_products = await cartModel.aggregate([
+        {
+          $match: {
+            userId: {
+              $eq: new ObjectId(userId),
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: 'products',
+            localField: 'productId',
+            foreignField: '_id',
+            as: 'products',
+          },
+        },
+      ]);
+      let buy_product_item = 0;
+      let calculatePrices = 0;
+      let cart_products_count = 0;
+      const outOfStockProducts = cart_products.filter(
+        (p) => p.products[0].stock < p.quantity
+      );
+      for (let i = 0; i < outOfStockProducts.length; i++) {
+        cart_products_count =
+          cart_products_count + outOfStockProducts[i].quantity;
+      }
+
+      console.log(outOfStockProducts);
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get cart products method
 }
 
 module.exports = new cartControllers();
