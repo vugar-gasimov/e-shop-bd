@@ -49,6 +49,7 @@ class cartControllers {
   }; // End of add to cart method
 
   get_cart_products = async (req, res) => {
+    const commission = 5;
     const { userId } = req.params;
 
     try {
@@ -79,12 +80,121 @@ class cartControllers {
         cart_products_count =
           cart_products_count + outOfStockProducts[i].quantity;
       }
+      const productsInStock = cart_products.filter(
+        (p) => p.products[0].stock >= p.quantity
+      );
+      for (let i = 0; i < productsInStock.length; i++) {
+        const { quantity } = productsInStock[i];
+        cart_products_count = buy_product_item + quantity;
+        buy_product_item = buy_product_item + quantity;
+        const { price, discount } = productsInStock[i].products[0];
 
-      console.log(outOfStockProducts);
+        if (discount !== 0) {
+          calculatePrices =
+            calculatePrices +
+            quantity * (price - Math.floor((price * discount) / 100));
+        } else {
+          calculatePrices = calculatePrices + quantity * price;
+        }
+      } // End of for loop
+      let p = [];
+      let unique = [
+        ...new Set(
+          productsInStock.map((p) => p.products[0].vendorId.toString())
+        ),
+      ];
+      for (let i = 0; i < unique.length; i++) {
+        let price = 0;
+        for (let j = 0; j < productsInStock.length; j++) {
+          const tempProduct = productsInStock[j].products[0];
+          if (unique[i] === tempProduct.vendorId.toString()) {
+            let pri = 0;
+            if (tempProduct.discount !== 0) {
+              pri =
+                tempProduct.price -
+                Math.floor((tempProduct.price * tempProduct.discount) / 100);
+            } else {
+              pri = tempProduct.price;
+            }
+            pri = pri - Math.floor((pri * commission) / 100);
+            price = price + pri * productsInStock[j].quantity;
+            p[i] = {
+              vendorId: unique[i],
+              shopName: tempProduct.shopName,
+              price,
+              products: p[i]
+                ? [
+                    ...p[i].products,
+                    {
+                      _id: productsInStock[j]._id,
+                      quantity: productsInStock[j].quantity,
+                      productsInfo: tempProduct,
+                    },
+                  ]
+                : [
+                    {
+                      _id: productsInStock[j]._id,
+                      quantity: productsInStock[j].quantity,
+                      productsInfo: tempProduct,
+                    },
+                  ],
+            };
+          }
+        }
+      }
+      responseReturn(res, 201, {
+        cart_products: p,
+        price: calculatePrices,
+        cart_products_count,
+        shipping_fee: 20 * p.length,
+        outOfStockProducts,
+        buy_product_item,
+        message: 'Cart products fetched successfully',
+      });
     } catch (error) {
       console.log(error.message);
     }
   }; // End of get cart products method
+
+  remove_cart_product = async (req, res) => {
+    const { cartId } = req.params;
+    try {
+      await cartModel.findByIdAndDelete(cartId);
+      responseReturn(res, 200, {
+        message: 'Product removed successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of remove cart product method
+
+  quantity_increment = async (req, res) => {
+    const { cartId } = req.params;
+    try {
+      const product = await cartModel.findById(cartId);
+      const { quantity } = product;
+      await cartModel.findByIdAndUpdate(cartId, { quantity: quantity + 1 });
+      responseReturn(res, 200, {
+        message: 'Product incremented successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of quantity increment method
+
+  quantity_decrement = async (req, res) => {
+    const { cartId } = req.params;
+    try {
+      const product = await cartModel.findById(cartId);
+      const { quantity } = product;
+      await cartModel.findByIdAndUpdate(cartId, { quantity: quantity - 1 });
+      responseReturn(res, 200, {
+        message: 'Product decremented successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of quantity decrement method
 }
 
 module.exports = new cartControllers();
