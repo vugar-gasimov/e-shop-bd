@@ -18,7 +18,7 @@ const customerOrderSchema = new Schema(
       type: String,
       required: true,
     },
-    shipping_info: {
+    shippingInfo: {
       type: Object,
       required: true,
     },

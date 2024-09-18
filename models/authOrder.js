@@ -22,7 +22,7 @@ const authOrderSchema = new Schema(
       type: String,
       required: true,
     },
-    shipping_info: {
+    shippingInfo: {
       type: String,
       required: true,
     },
