@@ -35,8 +35,7 @@ class authControllers {
         responseReturn(res, 404, { error: 'Admin not found' });
       }
     } catch (error) {
-      console.error('Error during admin login:', error);
-      responseReturn(res, 500, { error: 'An error occurred during login' });
+      console.log(error.message);
     }
   }; // End of admin_login
 
@@ -67,8 +66,7 @@ class authControllers {
         responseReturn(res, 404, { error: 'Vendor not found' });
       }
     } catch (error) {
-      console.error('Error during vendor login:', error);
-      responseReturn(res, 500, { error: 'An error occurred during login' });
+      console.log(error.message);
     }
   }; // End of vendor_login
 
@@ -102,7 +100,7 @@ class authControllers {
         });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: 'Internal server error.' });
+      console.log(error.message);
     }
   }; // End of vendor_register
 
@@ -117,9 +115,7 @@ class authControllers {
         responseReturn(res, 200, { userInfo: vendor });
       }
     } catch (error) {
-      responseReturn(res, 500, {
-        error: 'An error occurred while fetching user data',
-      });
+      console.log(error.message);
     }
   }; // End of getUser
 
@@ -164,8 +160,7 @@ class authControllers {
           responseReturn(res, 500, { error: 'Image upload failed' });
         }
       } catch (error) {
-        console.error(error);
-        responseReturn(res, 500, { error: 'Internal server error' });
+        console.log(error.message);
       }
     });
   }; // End of upload Image
@@ -189,8 +184,7 @@ class authControllers {
         message: 'Shop information updated successfully.',
       });
     } catch (error) {
-      console.error(error);
-      responseReturn(res, 500, { error: 'Internal server error' });
+      console.log(error.message);
     }
   }; // End of add Profile Info method
 }

@@ -44,9 +44,7 @@ class categoryController {
             });
           }
         } catch (error) {
-          responseReturn(res, 500, {
-            error: 'Internal server error during image upload 500.',
-          });
+          console.log(error.message);
         }
       }
     });
@@ -100,10 +98,7 @@ class categoryController {
         });
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      responseReturn(res, 500, {
-        error: 'Internal server error. Please try again later.',
-      });
+      console.log(error.message);
     }
   }; // End of get categories method
 }

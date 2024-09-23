@@ -17,10 +17,7 @@ class vendorController {
         message: 'Vendor retrieved successfully.',
       });
     } catch (error) {
-      console.error('Error fetching vendor:', error);
-      responseReturn(res, 500, {
-        error: 'Internal server error. Please try again later.',
-      });
+      console.log(error.message);
     }
   }; // End of get vendor method
 
@@ -69,10 +66,7 @@ class vendorController {
         });
       }
     } catch (error) {
-      console.error('Error fetching vendors:', error);
-      responseReturn(res, 500, {
-        error: 'Internal server error. Please try again later.',
-      });
+      console.log(error.message);
     }
   }; // End of get vendors method
 
@@ -96,10 +90,7 @@ class vendorController {
         message: 'Vendor status updated successfully.',
       });
     } catch (error) {
-      console.error('Error updating vendor status:', error.message);
-      responseReturn(res, 500, {
-        error: 'Internal server error during vendor status update.',
-      });
+      console.log(error.message);
     }
   }; // End of update vendor status method
 }

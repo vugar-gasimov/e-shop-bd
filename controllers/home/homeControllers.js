@@ -31,12 +31,7 @@ class homeControllers {
         message: 'Categories fetched successfully',
       });
     } catch (error) {
-      console.error('Error fetching categories:', error);
-
-      responseReturn(res, 500, {
-        success: false,
-        message: 'Failed to fetch categories',
-      });
+      console.log(error.message);
     }
   };
   // End of get categories method
@@ -75,12 +70,7 @@ class homeControllers {
         message: 'Products fetched successfully',
       });
     } catch (error) {
-      console.error('Error fetching products:', error);
-
-      responseReturn(res, 500, {
-        success: false,
-        message: 'Failed to fetch products',
-      });
+      console.log(error.message);
     }
   };
   // End of get products method
@@ -112,12 +102,7 @@ class homeControllers {
         message: 'Product price range fetched successfully',
       });
     } catch (error) {
-      console.error('Error fetching products price range:', error);
-
-      responseReturn(res, 500, {
-        success: false,
-        message: 'Failed to fetch products price range',
-      });
+      console.log(error.message);
     }
   };
   // End of get product price range method
@@ -155,12 +140,7 @@ class homeControllers {
         message: 'Query products fetched successfully',
       });
     } catch (error) {
-      console.error('Error fetching query products:', error);
-
-      responseReturn(res, 500, {
-        success: false,
-        message: 'Failed to fetch query products',
-      });
+      console.log(error.message);
     }
   };
   // End of get query products method

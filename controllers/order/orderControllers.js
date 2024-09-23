@@ -1,8 +1,13 @@
 const moment = require('moment');
+const {
+  mongo: { ObjectId },
+} = require('mongoose');
+
+const { responseReturn } = require('../../utils/response');
+
+const cartModel = require('../../models/cartModel');
 const authOrderModel = require('../../models/authOrder');
 const custOrderModel = require('../../models/customerOrder');
-const cartModel = require('../../models/cartModel');
-const { responseReturn } = require('../../utils/response');
 class orderControllers {
   payment_check = async (id) => {
     try {
@@ -91,5 +96,51 @@ class orderControllers {
       console.log(error.message);
     }
   }; // End of place order method =====================
+
+  get_dashboard = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+      const recentOrders = await custOrderModel
+        .find({
+          customerId: new ObjectId(userId),
+        })
+        .limit(5);
+
+      const pendingOrders = await custOrderModel
+        .find({
+          customerId: new ObjectId(userId),
+          delivery_status: ' pending',
+        })
+        .countDocuments();
+
+      const totalOrders = await custOrderModel
+        .find({
+          customerId: new ObjectId(userId),
+        })
+        .countDocuments();
+
+      const cancelledOrders = await custOrderModel
+        .find({
+          customerId: new ObjectId(userId),
+          delivery_status: ' cancelled',
+        })
+        .countDocuments();
+
+      responseReturn(res, 200, {
+        recentOrders,
+        pendingOrders,
+        totalOrders,
+        cancelledOrders,
+        message: 'Customer dashboard data fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get customer dashboard index data method =====================
+
+  get_orders = async (req, res) => {
+    console.log(req.params);
+  };
 }
 module.exports = new orderControllers();

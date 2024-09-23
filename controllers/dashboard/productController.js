@@ -127,10 +127,7 @@ class productController {
         });
       }
     } catch (error) {
-      console.error(error);
-      responseReturn(res, 500, {
-        error: 'Internal server error during product retrieval.',
-      });
+      console.log(error.message);
     }
   }; // End of get products method
 
@@ -145,10 +142,7 @@ class productController {
         message: 'Product retrieved successfully.',
       });
     } catch (error) {
-      console.error(error);
-      responseReturn(res, 500, {
-        error: 'Internal server error during product retrieval.',
-      });
+      console.log(error.message);
     }
   }; // End of get product with id method
 
@@ -183,10 +177,7 @@ class productController {
         message: 'Product updated successfully.',
       });
     } catch (error) {
-      console.error(error);
-      responseReturn(res, 500, {
-        error: 'Internal server error during product update.',
-      });
+      console.log(error.message);
     }
   }; // End of edit product with id method
 
@@ -237,10 +228,7 @@ class productController {
             });
           }
         } catch (error) {
-          console.error(error);
-          responseReturn(res, 500, {
-            error: 'Internal server error during image update',
-          });
+          console.log(error.message);
         }
       }
     });
