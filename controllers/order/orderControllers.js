@@ -81,8 +81,8 @@ class orderControllers {
         });
       }
       await authOrderModel.insertMany(authOrderData);
-      for (let i = 0; i < cartId.length; i++) {
-        await cartModel.findByIdAndDelete(cartId[i]);
+      for (let k = 0; k < cartId.length; k++) {
+        await cartModel.findByIdAndDelete(cartId[k]);
       }
 
       setTimeout(() => {
@@ -140,7 +140,41 @@ class orderControllers {
   }; // End of get customer dashboard index data method =====================
 
   get_orders = async (req, res) => {
-    console.log(req.params);
-  };
+    const { customerId, status } = req.params;
+
+    try {
+      let orders = [];
+      if (status !== 'all') {
+        orders = await custOrderModel.find({
+          customerId: new ObjectId(customerId),
+          delivery_status: status,
+        });
+      } else {
+        orders = await custOrderModel.find({
+          customerId: new ObjectId(customerId),
+        });
+      }
+      responseReturn(res, 200, {
+        orders,
+        message: 'Customer orders data fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get orders data method =====================
+
+  get_order_info = async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+      const order = await custOrderModel.findById(orderId);
+      responseReturn(res, 200, {
+        order,
+        message: 'Customer order info fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get order info method =====================
 }
 module.exports = new orderControllers();

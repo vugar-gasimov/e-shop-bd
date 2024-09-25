@@ -10,5 +10,9 @@ router.get(
   '/home/customer/get-orders/:customerId/:status',
   orderControllers.get_orders
 );
+router.get(
+  '/home/customer/get-order-info/:orderId',
+  orderControllers.get_order_info
+);
 
 module.exports = router;
