@@ -1,4 +1,5 @@
 const cartModel = require('../../models/cartModel');
+const wishlistModel = require('../../models/wishlistModel');
 const { responseReturn } = require('../../utils/response');
 const {
   mongo: { ObjectId },
@@ -195,6 +196,25 @@ class cartControllers {
       console.log(error.message);
     }
   }; // End of quantity decrement method
+
+  add_to_wishlist = async (req, res) => {
+    const { slug } = req.body;
+    try {
+      const product = await wishlistModel.findOne({ slug });
+      if (product) {
+        responseReturn(res, 404, {
+          error: 'Product is already in wishlist.',
+        });
+      } else {
+        await wishlistModel.create(req.body);
+        responseReturn(res, 201, {
+          message: 'Product is added successfully in wishlist.',
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of add to wishlist product method
 }
 
 module.exports = new cartControllers();

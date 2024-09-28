@@ -19,4 +19,6 @@ router.put(
   cartControllers.quantity_decrement
 );
 
+router.post('/home/product/add-to-wishlist', cartControllers.add_to_wishlist);
+
 module.exports = router;
