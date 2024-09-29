@@ -215,6 +215,34 @@ class cartControllers {
       console.log(error.message);
     }
   }; // End of add to wishlist product method
+
+  get_wishlist_products = async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const wishlist = await wishlistModel.find({ userId });
+      responseReturn(res, 200, {
+        wishlistCount: wishlist.length,
+        wishlist,
+        message: 'Wishlist products fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get wishlist products method
+
+  remove_wishlist_product = async (req, res) => {
+    const { wishlistId } = req.params;
+
+    try {
+      const wishlist = await wishlistModel.findByIdAndDelete(wishlistId);
+      responseReturn(res, 200, {
+        message: 'Wishlist product removed successfully.',
+        wishlistId,
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of remove wishlist product method
 }
 
 module.exports = new cartControllers();

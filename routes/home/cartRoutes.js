@@ -21,4 +21,14 @@ router.put(
 
 router.post('/home/product/add-to-wishlist', cartControllers.add_to_wishlist);
 
+router.get(
+  '/home/product/get-wishlist-products/:userId',
+  cartControllers.get_wishlist_products
+);
+
+router.delete(
+  '/home/product/remove-wishlist-product/:wishlistId',
+  cartControllers.remove_wishlist_product
+);
+
 module.exports = router;

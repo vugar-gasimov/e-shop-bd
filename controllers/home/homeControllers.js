@@ -144,6 +144,57 @@ class homeControllers {
     }
   };
   // End of get query products method
+
+  product_details = async (req, res) => {
+    const { slug } = req.params;
+    try {
+      const product = await productModel.findOne({ slug });
+
+      const relatedProducts = await productModel
+        .find({
+          $and: [
+            {
+              _id: {
+                $ne: product._id,
+              },
+            },
+            {
+              category: {
+                $eq: product.category,
+              },
+            },
+          ],
+        })
+        .limit(12);
+
+      const sameVendorProducts = await productModel
+        .find({
+          $and: [
+            {
+              _id: {
+                $ne: product._id,
+              },
+            },
+            {
+              vendorId: {
+                $eq: product.vendorId,
+              },
+            },
+          ],
+        })
+        .limit(3);
+
+      responseReturn(res, 200, {
+        product,
+        relatedProducts,
+        sameVendorProducts,
+        success: true,
+        message: 'Product details fetched successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get product details method
 }
 
 module.exports = new homeControllers();
