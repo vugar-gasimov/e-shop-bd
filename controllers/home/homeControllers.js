@@ -238,7 +238,7 @@ class homeControllers {
 
   get_reviews = async (req, res) => {
     const { productId } = req.params;
-    const { pageNu } = req.query;
+    let { pageNu } = req.query;
     pageNu = parseInt(pageNu);
     const limit = 5;
     const skipPage = limit * (pageNu - 1);
