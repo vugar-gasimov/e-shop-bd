@@ -23,12 +23,25 @@ const io = socket(server, {
   },
 });
 
-let allCustomer = [];
+let allCustomers = [];
+let allVendors = [];
+
 const addUser = (customerId, socketId, userInfo) => {
-  const checkUser = allCustomer.some((u) => u.customerId === customerId);
+  const checkUser = allCustomers.some((u) => u.customerId === customerId);
   if (!checkUser) {
-    allCustomer.push({
+    allCustomers.push({
       customerId,
+      socketId,
+      userInfo,
+    });
+  }
+};
+
+const addVendor = (vendorId, socketId, userInfo) => {
+  const checkVendor = allVendors.some((u) => u.vendorId === vendorId);
+  if (!checkVendor) {
+    allVendors.push({
+      vendorId,
       socketId,
       userInfo,
     });
@@ -40,6 +53,10 @@ io.on('connection', (soc) => {
 
   soc.on('add_user', (customerId, userInfo) => {
     addUser(customerId, soc.id, userInfo);
+  });
+
+  soc.on('add_vendor', (vendorId, userInfo) => {
+    addVendor(vendorId, soc.id, userInfo);
   });
 });
 

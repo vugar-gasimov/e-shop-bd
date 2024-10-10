@@ -85,7 +85,7 @@ class chatController {
           (s) => s.fdId === vendorId
         );
         responseReturn(res, 201, {
-          myFriends: myFriends?.friendsId || [],
+          my_friends: myFriends?.friendsId,
           currentFd,
           messages,
           message: 'Friend added to chat successfully',
@@ -95,7 +95,7 @@ class chatController {
           myId: userId,
         });
         responseReturn(res, 201, {
-          myFriends: myFriends.friendsId,
+          my_friends: myFriends?.friendsId,
         });
       }
     } catch (error) {
@@ -152,6 +152,31 @@ class chatController {
       console.error(error.message);
     }
   }; // End of sent message method
+
+  get_customers = async (req, res) => {
+    const { vendorId } = req.params;
+    if (!vendorId) {
+      return responseReturn(res, 400, {
+        error: 'vendorId is required',
+      });
+    }
+    try {
+      const data = await vendorCustomersModel.findOne({
+        myId: vendorId,
+      });
+
+      if (!data) {
+        return responseReturn(res, 404, {
+          message: 'No customers found for this vendor',
+        });
+      }
+      responseReturn(res, 200, {
+        customers: data.friendsId || [],
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get customers method
 }
 
 module.exports = new chatController();
