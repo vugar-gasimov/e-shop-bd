@@ -48,6 +48,10 @@ const addVendor = (vendorId, socketId, userInfo) => {
   }
 };
 
+const findCustomer = (customerId) => {
+  return allCustomers.find((c) => c.customerId === customerId);
+};
+
 io.on('connection', (soc) => {
   console.log('Socket server running...');
 
@@ -57,6 +61,12 @@ io.on('connection', (soc) => {
 
   soc.on('add_vendor', (vendorId, userInfo) => {
     addVendor(vendorId, soc.id, userInfo);
+  });
+  soc.on('send_message', (msg) => {
+    const customer = findCustomer(msg.receiverId);
+    if (customer !== undefined) {
+      soc.to(customer.socketId).emit('vendor_message', msg);
+    }
   });
 });
 

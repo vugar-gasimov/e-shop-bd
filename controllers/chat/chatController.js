@@ -177,6 +177,80 @@ class chatController {
       console.log(error.message);
     }
   }; // End of get customers method
+
+  get_customer_message = async (req, res) => {
+    const { customerId } = req.params;
+    const { id } = req;
+
+    try {
+      const messages = await vendorCustomerMessageModel.find({
+        $or: [
+          { receiverId: customerId, senderId: id },
+          { receiverId: id, senderId: customerId },
+        ],
+      });
+      const currentCustomer = await customerModel.findById(customerId);
+      responseReturn(res, 200, {
+        messages,
+        currentCustomer,
+        message: 'Customer message fetched successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get customer message method
+
+  send_message_customer = async (req, res) => {
+    const { senderId, receiverId, text, name } = req.body;
+    try {
+      const newMessage = await vendorCustomerMessageModel.create({
+        senderId: senderId,
+        senderName: name,
+        receiverId: receiverId,
+        message: text,
+      });
+      const userFriends = await vendorCustomersModel.findOne({
+        myId: senderId,
+      });
+      let userFriendList = userFriends.friendsId;
+      let vendorIndex = userFriendList.findIndex((f) => f.fdId === receiverId);
+
+      if (vendorIndex > -1) {
+        const [vendorFriend] = userFriendList.splice(vendorIndex, 1);
+        userFriendList.unshift(vendorFriend);
+      }
+      await vendorCustomersModel.updateOne(
+        {
+          myId: senderId,
+        },
+        {
+          friendsId: userFriendList,
+        }
+      );
+      const vendorFriends = await vendorCustomersModel.findOne({
+        myId: receiverId,
+      });
+      let vendorFriendList = vendorFriends.friendsId;
+      let userIndex = vendorFriendList.findIndex((f) => f.fdId === senderId);
+
+      if (userIndex > -1) {
+        const [userFriend] = vendorFriendList.splice(userIndex, 1);
+        vendorFriendList.unshift(userFriend);
+      }
+      await vendorCustomersModel.updateOne(
+        {
+          myId: receiverId,
+        },
+        { friendsId: vendorFriendList }
+      );
+      responseReturn(res, 201, {
+        newMessage,
+        message: 'Vendor message posted successfully',
+      });
+    } catch (error) {
+      console.error(error.message);
+    }
+  }; // End of post vendor message method
 }
 
 module.exports = new chatController();
