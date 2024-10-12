@@ -51,22 +51,54 @@ const addVendor = (vendorId, socketId, userInfo) => {
 const findCustomer = (customerId) => {
   return allCustomers.find((c) => c.customerId === customerId);
 };
+const findVendor = (vendorId) => {
+  return allVendors.find((c) => c.vendorId === vendorId);
+};
+
+const remove = (socketId) => {
+  allCustomers = allCustomers.filter((c) => c.socketId !== socketId);
+  allVendors = allVendors.filter((c) => c.socketId !== socketId);
+};
 
 io.on('connection', (soc) => {
   console.log('Socket server running...');
 
   soc.on('add_user', (customerId, userInfo) => {
     addUser(customerId, soc.id, userInfo);
+    io.emit('activeVendor', allVendors);
   });
 
   soc.on('add_vendor', (vendorId, userInfo) => {
     addVendor(vendorId, soc.id, userInfo);
+    io.emit('activeVendor', allVendors);
   });
-  soc.on('send_message', (msg) => {
+
+  soc.on('send_vendor_message', (msg) => {
+    if (!msg || !msg.receiverId) {
+      console.error('Invalid message or missing receiverId', msg);
+      return;
+    }
     const customer = findCustomer(msg.receiverId);
     if (customer !== undefined) {
       soc.to(customer.socketId).emit('vendor_message', msg);
     }
+  });
+
+  soc.on('send_customer_message', (msg) => {
+    if (!msg || !msg.receiverId) {
+      console.error('Invalid message or missing receiverId', msg);
+      return;
+    }
+    const vendor = findVendor(msg.receiverId);
+    if (vendor !== undefined) {
+      soc.to(vendor.socketId).emit('customer_message', msg);
+    }
+  });
+
+  soc.on('disconnect', () => {
+    console.log('user disconnected');
+    remove(soc.id);
+    io.emit('activeVendor', allVendors);
   });
 });
 
@@ -90,6 +122,9 @@ app.get('/', (req, res) => res.send('My E-Shop Back-end'));
 
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(500).json({ error: 'An unexpected error occurred' });
 });
 
