@@ -25,6 +25,7 @@ const io = socket(server, {
 
 let allCustomers = [];
 let allVendors = [];
+let admin = {};
 
 const addUser = (customerId, socketId, userInfo) => {
   const checkUser = allCustomers.some((u) => u.customerId === customerId);
@@ -93,6 +94,18 @@ io.on('connection', (soc) => {
     if (vendor !== undefined) {
       soc.to(vendor.socketId).emit('customer_message', msg);
     }
+  });
+
+  soc.on('add_admin', (adminInfo) => {
+    if (!adminInfo || typeof adminInfo !== 'object') {
+      console.error('Invalid adminInfo received:', adminInfo);
+      return;
+    }
+    delete adminInfo.email;
+    delete adminInfo.password;
+    admin = adminInfo;
+    admin.socketId = soc.id;
+    io.emit('activeVendor', allVendors);
   });
 
   soc.on('disconnect', () => {

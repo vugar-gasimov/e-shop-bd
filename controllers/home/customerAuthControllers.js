@@ -91,6 +91,20 @@ class customerAuthControllers {
     }
   };
   // End of post customer login method
+
+  customer_logout = async (req, res) => {
+    try {
+      res.cookie('customerToken', '', {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      });
+      responseReturn(res, 200, { message: 'User logout success.' });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get customer logout method
 }
 
 module.exports = new customerAuthControllers();

@@ -22,4 +22,10 @@ router.post(
   chatController.send_message_customer
 );
 
+router.get(
+  '/chat/admin/get-vendors',
+  authMiddleware,
+  chatController.get_vendors
+);
+
 module.exports = router;

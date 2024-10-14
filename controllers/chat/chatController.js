@@ -251,6 +251,23 @@ class chatController {
       console.error(error.message);
     }
   }; // End of post vendor message method
+
+  get_vendors = async (req, res) => {
+    try {
+      const vendors = await vendorModel.find({});
+
+      if (vendors.length === 0) {
+        return responseReturn(res, 404, {
+          message: 'No Vendors found.',
+        });
+      }
+      responseReturn(res, 200, {
+        vendors,
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get vendors method
 }
 
 module.exports = new chatController();
