@@ -3,6 +3,7 @@ const vendorModel = require('../../models/vendorModel');
 const customerModel = require('../../models/customerModel');
 const vendorCustomersModel = require('../../models/chat/vendorCustomersModel');
 const vendorCustomerMessageModel = require('../../models/chat/vendorCustomerMessageModel');
+const adminVendorMessage = require('../../models/chat/adminVendorMessage');
 
 class chatController {
   add_friend = async (req, res) => {
@@ -268,6 +269,56 @@ class chatController {
       console.log(error.message);
     }
   }; // End of get vendors method
+
+  send_admin_message = async (req, res) => {
+    const { senderId, receiverId, message, senderName } = req.body;
+    if (!receiverId || !message || !senderName) {
+      return responseReturn(res, 400, {
+        error: 'All fields ( receiverId, message, senderName ) are required.',
+      });
+    }
+    try {
+      const adminMessage = await adminVendorMessage.create({
+        senderId,
+        receiverId,
+        message,
+        senderName,
+      });
+      responseReturn(res, 200, {
+        message: 'Message sent successfully!',
+        data: adminMessage,
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of send admin message method
+
+  get_admin_messages = async (req, res) => {
+    console.log(req.params);
+    const { receiverId } = req.params;
+
+    const id = '';
+
+    try {
+      const messages = await adminVendorMessage.find({
+        $or: [
+          { receiverId: receiverId, senderId: id },
+          { receiverId: id, senderId: receiverId },
+        ],
+      });
+      let currentVendor = {};
+      if (receiverId) {
+        const currentVendor = await vendorModel.findById(receiverId);
+      }
+      responseReturn(res, 200, {
+        messages,
+        currentVendor,
+        message: 'Admin messages fetched successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get admin messages method
 }
 
 module.exports = new chatController();

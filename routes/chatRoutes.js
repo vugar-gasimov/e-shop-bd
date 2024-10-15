@@ -28,4 +28,16 @@ router.get(
   chatController.get_vendors
 );
 
+router.post(
+  '/chat/send-admin-message',
+  authMiddleware,
+  chatController.send_admin_message
+);
+
+router.get(
+  '/chat/get-admin-messages/:receiverId',
+  authMiddleware,
+  chatController.get_admin_messages
+);
+
 module.exports = router;

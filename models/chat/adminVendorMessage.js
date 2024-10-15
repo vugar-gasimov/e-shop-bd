@@ -1,6 +1,6 @@
 const { Schema, model } = require('mongoose');
 
-const vendorCustomersMessageSchema = new Schema(
+const adminVendorMessageSchema = new Schema(
   {
     senderName: {
       type: String,
@@ -8,11 +8,11 @@ const vendorCustomersMessageSchema = new Schema(
     },
     senderId: {
       type: String,
-      required: true,
+      default: '',
     },
     receiverId: {
       type: String,
-      required: true,
+      default: '',
     },
     message: {
       type: String,
@@ -27,7 +27,4 @@ const vendorCustomersMessageSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model(
-  'vendor_customers_messages',
-  vendorCustomersMessageSchema
-);
+module.exports = model('admin_vendor_messages', adminVendorMessageSchema);
