@@ -272,9 +272,9 @@ class chatController {
 
   send_admin_message = async (req, res) => {
     const { senderId, receiverId, message, senderName } = req.body;
-    if (!receiverId || !message || !senderName) {
+    if (!message || !senderName) {
       return responseReturn(res, 400, {
-        error: 'All fields ( receiverId, message, senderName ) are required.',
+        error: 'All fields (  message, senderName ) are required.',
       });
     }
     try {
@@ -294,7 +294,6 @@ class chatController {
   }; // End of send admin message method
 
   get_admin_messages = async (req, res) => {
-    console.log(req.params);
     const { receiverId } = req.params;
 
     const id = '';
@@ -319,6 +318,29 @@ class chatController {
       console.log(error.message);
     }
   }; // End of get admin messages method
+
+  get_vendor_messages = async (req, res) => {
+    const receiverId = '';
+
+    const { id } = req;
+
+    try {
+      const messages = await adminVendorMessage.find({
+        $or: [
+          { receiverId: receiverId, senderId: id },
+          { receiverId: id, senderId: receiverId },
+        ],
+      });
+
+      responseReturn(res, 200, {
+        messages,
+
+        message: 'Admin messages fetched successfully',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get vendor messages method
 }
 
 module.exports = new chatController();

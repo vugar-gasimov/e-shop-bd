@@ -39,5 +39,10 @@ router.get(
   authMiddleware,
   chatController.get_admin_messages
 );
+router.get(
+  '/chat/get-vendor-messages',
+  authMiddleware,
+  chatController.get_vendor_messages
+);
 
 module.exports = router;

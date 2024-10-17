@@ -95,6 +95,26 @@ io.on('connection', (soc) => {
       soc.to(vendor.socketId).emit('customer_message', msg);
     }
   });
+  soc.on('send_message_admin_vendor', (msg) => {
+    if (!msg || !msg.receiverId) {
+      console.error('Invalid message or missing receiverId', msg);
+      return;
+    }
+    const vendor = findVendor(msg.receiverId);
+    if (vendor !== undefined) {
+      soc.to(vendor.socketId).emit('received_admin_message', msg);
+    }
+  });
+
+  soc.on('send_message_vendor_admin', (msg) => {
+    // if (!msg || !msg.receiverId) {
+    //   console.error('Invalid message or missing receiverId', msg);
+    //   return;
+    // }
+    if (admin.socketId) {
+      soc.to(admin.socketId).emit('received_vendor_message', msg);
+    }
+  });
 
   soc.on('add_admin', (adminInfo) => {
     if (!adminInfo || typeof adminInfo !== 'object') {
