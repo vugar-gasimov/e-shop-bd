@@ -13,4 +13,10 @@ router.post(
   vendorController.updateVendorStatus
 );
 
+router.get(
+  '/get-active-vendors',
+  authMiddleware,
+  vendorController.get_activeVendors
+);
+
 module.exports = router;

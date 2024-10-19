@@ -44,4 +44,17 @@ const vendorSchema = new Schema(
   { timestamps: true }
 );
 
+vendorSchema.index(
+  {
+    name: 'text',
+    email: 'text',
+  },
+  {
+    weights: {
+      name: 5,
+      email: 4,
+    },
+  }
+);
+
 module.exports = model('vendors', vendorSchema);

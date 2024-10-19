@@ -107,10 +107,6 @@ io.on('connection', (soc) => {
   });
 
   soc.on('send_message_vendor_admin', (msg) => {
-    // if (!msg || !msg.receiverId) {
-    //   console.error('Invalid message or missing receiverId', msg);
-    //   return;
-    // }
     if (admin.socketId) {
       soc.to(admin.socketId).emit('received_vendor_message', msg);
     }
