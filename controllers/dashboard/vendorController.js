@@ -145,6 +145,58 @@ class vendorController {
       console.log(error.message);
     }
   }; //End of get active vendors
+
+  get_deactiveVendors = async (req, res) => {
+    let { page, searchValue, perPage } = req.query;
+    page = parseInt(page);
+    perPage = parseInt(perPage);
+
+    const skipPage = perPage * (page - 1);
+
+    try {
+      if (searchValue) {
+        const vendors = await vendorModel
+          .find({
+            $text: { $search: searchValue },
+            status: 'deactivated',
+          })
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+
+        const totalVendors = await vendorModel
+          .find({
+            $text: { $search: searchValue },
+            status: 'deactivated',
+          })
+          .countDocuments();
+        responseReturn(res, 200, {
+          totalVendors,
+          vendors,
+        });
+      } else {
+        const vendors = await vendorModel
+          .find({
+            status: 'deactivated',
+          })
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+
+        const totalVendors = await vendorModel
+          .find({
+            status: 'deactivated',
+          })
+          .countDocuments();
+        responseReturn(res, 200, {
+          totalVendors,
+          vendors,
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; //End of get deactivated vendors
 }
 
 module.exports = new vendorController();

@@ -18,5 +18,10 @@ router.get(
   authMiddleware,
   vendorController.get_activeVendors
 );
+router.get(
+  '/get-deactive-vendors',
+  authMiddleware,
+  vendorController.get_deactiveVendors
+);
 
 module.exports = router;
