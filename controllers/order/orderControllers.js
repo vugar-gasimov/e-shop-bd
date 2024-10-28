@@ -176,5 +176,53 @@ class orderControllers {
       console.log(error.message);
     }
   }; // End of get order info method =====================
+  // Admin Orders
+  get_admin_orders = async (req, res) => {
+    let { page, searchValue, perPage } = req.query;
+    page = parseInt(page);
+    perPage = parseInt(perPage);
+
+    const skipPage = perPage * (page - 1);
+
+    try {
+      if (searchValue) {
+      } else {
+        const orders = await custOrderModel
+          .aggregate([
+            {
+              $lookup: {
+                from: 'authorders',
+                localField: '_id',
+                foreignField: 'orderId',
+                as: 'suborder',
+              },
+            },
+          ])
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+
+        const totalOrders = await custOrderModel.aggregate([
+          {
+            $lookup: {
+              from: 'authorders',
+              localField: '_id',
+              foreignField: 'orderId',
+              as: 'suborder',
+            },
+          },
+        ]);
+        responseReturn(res, 200, {
+          orders,
+          totalOrders: totalOrders.length,
+          message: 'Admin orders fetched successfully.',
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get admin orders method =====================
+
+  // Vendor Orders
 }
 module.exports = new orderControllers();
