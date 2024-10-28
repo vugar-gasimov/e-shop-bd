@@ -221,7 +221,32 @@ class orderControllers {
     } catch (error) {
       console.log(error.message);
     }
-  }; // End of get admin orders method =====================
+  }; // End of get admin orders method. =====================
+
+  get_admin_order = async (req, res) => {
+    const { orderId } = req.params;
+    try {
+      const order = await custOrderModel.aggregate([
+        {
+          $match: { _id: new ObjectId(orderId) },
+        },
+        {
+          $lookup: {
+            from: 'authorders',
+            localField: '_id',
+            foreignField: 'orderId',
+            as: 'suborder',
+          },
+        },
+      ]);
+      responseReturn(res, 200, {
+        order: order[0],
+        message: 'Admin order details fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get admin order details. =====================
 
   // Vendor Orders
 }
