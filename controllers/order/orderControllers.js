@@ -248,6 +248,21 @@ class orderControllers {
     }
   }; // End of get admin order details. =====================
 
+  adminUpdateOrderStatus = async (req, res) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    try {
+      await custOrderModel.findByIdAndUpdate(orderId, {
+        delivery_status: status,
+      });
+      responseReturn(res, 200, {
+        message: 'Admin updated order status successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of admin update oder status method
+
   // Vendor Orders
 }
 module.exports = new orderControllers();
