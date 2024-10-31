@@ -308,5 +308,20 @@ class orderControllers {
       console.log(error.message);
     }
   }; // End of get vendor order details. =====================
+
+  vendorUpdateOrderStatus = async (req, res) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    try {
+      await authOrderModel.findByIdAndUpdate(orderId, {
+        delivery_status: status,
+      });
+      responseReturn(res, 200, {
+        message: 'Vendor updated order status successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of vendor update oder status method
 }
 module.exports = new orderControllers();
