@@ -25,5 +25,7 @@ router.put(
 );
 
 // Vendor orders
+router.get('/vendor/get-orders/:vendorId', orderControllers.get_vendor_orders);
+router.get('/vendor/get-order/:orderId', orderControllers.get_vendor_order);
 
 module.exports = router;

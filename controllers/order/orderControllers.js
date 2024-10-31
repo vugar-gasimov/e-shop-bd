@@ -176,6 +176,7 @@ class orderControllers {
       console.log(error.message);
     }
   }; // End of get order info method =====================
+
   // Admin Orders
   get_admin_orders = async (req, res) => {
     let { page, searchValue, perPage } = req.query;
@@ -264,5 +265,48 @@ class orderControllers {
   }; // End of admin update oder status method
 
   // Vendor Orders
+  get_vendor_orders = async (req, res) => {
+    const { vendorId } = req.params;
+    let { page, searchValue, perPage } = req.query;
+    page = parseInt(page);
+    perPage = parseInt(perPage);
+
+    const skipPage = perPage * (page - 1);
+    try {
+      if (searchValue) {
+      } else {
+        const orders = await authOrderModel
+          .find({ vendorId })
+          .skip(skipPage)
+          .limit(perPage)
+          .sort({ createdAt: -1 });
+
+        const totalOrders = await authOrderModel
+          .find({ vendorId })
+          .countDocuments();
+        responseReturn(res, 200, {
+          orders,
+          totalOrders,
+          message: 'Vendor orders fetched successfully.',
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get vendor orders method
+
+  get_vendor_order = async (req, res) => {
+    const { orderId } = req.params;
+    try {
+      const order = await authOrderModel.findById(orderId);
+
+      responseReturn(res, 200, {
+        order,
+        message: 'Vendor order details fetched successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  }; // End of get vendor order details. =====================
 }
 module.exports = new orderControllers();
