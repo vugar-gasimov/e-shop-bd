@@ -1,9 +1,8 @@
+require('dotenv').config();
 const stripeModel = require('../../models/stripeModel');
 const vendorModel = require('../../models/vendorModel');
 const { v4: uuidv4 } = require('uuid');
-const stripe = require('stripe')(
-  'sk_test_51QFzHpCOlW0xYn4EwbUXBHidXrC2LE9UN7oH208sgft5f1NvvakkmnRm1DFWft8ByMxJhiYBgBe6vDXtBvx8JU0i00dE3564hg'
-);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { responseReturn } = require('../../utils/response');
 
 class paymentController {
