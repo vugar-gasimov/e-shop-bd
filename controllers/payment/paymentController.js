@@ -1,4 +1,5 @@
 const stripeModel = require('../../models/stripeModel');
+const vendorModel = require('../../models/vendorModel');
 const { v4: uuidv4 } = require('uuid');
 const stripe = require('stripe')(
   'sk_test_51QFzHpCOlW0xYn4EwbUXBHidXrC2LE9UN7oH208sgft5f1NvvakkmnRm1DFWft8ByMxJhiYBgBe6vDXtBvx8JU0i00dE3564hg'
@@ -13,7 +14,14 @@ class paymentController {
       const stripeInfo = await stripeModel.findOne({ vendorId: id });
       if (stripeInfo) {
         await stripeModel.deleteOne({ vendorId: id });
-        const account = await stripe.accounts.create({ type: 'express' });
+        const account = await stripe.accounts.create({
+          type: 'express',
+          country: 'PL',
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+        });
 
         const accountLink = await stripe.accountLinks.create({
           account: account.id,
@@ -32,7 +40,14 @@ class paymentController {
             'Stripe Connect account created successfully. Please complete onboarding using the provided link.',
         });
       } else {
-        const account = await stripe.accounts.create({ type: 'express' });
+        const account = await stripe.accounts.create({
+          type: 'express',
+          country: 'PL',
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
+          },
+        });
 
         const accountLink = await stripe.accountLinks.create({
           account: account.id,
@@ -58,5 +73,21 @@ class paymentController {
       );
     }
   }; // End of create stripe connect account method
+
+  active_stripe_connect_account = async (req, res) => {
+    const { activeCode } = req.params;
+    const { id } = req;
+    try {
+      const userStripeInfo = await stripeModel.findOne({ code: activeCode });
+      if (userStripeInfo) {
+        await vendorModel.findByIdAndUpdate(id, { payment: 'active' });
+        responseReturn(res, 200, { message: 'Payment success Active.' });
+      } else {
+        responseReturn(res, 200, { message: 'Payment success Active.' });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { message: 'Internal Server Error' });
+    }
+  }; // End of put active stripe connect account method
 }
 module.exports = new paymentController();
