@@ -1,21 +1,21 @@
 require('dotenv').config();
 const moment = require('moment');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const {
-  mongo: { ObjectId },
-} = require('mongoose');
+const { ObjectId } = require('mongoose').Types;
 
 const { responseReturn } = require('../../utils/response');
 
 const cartModel = require('../../models/cartModel');
 const authOrderModel = require('../../models/authOrder');
-const custOrderModel = require('../../models/customerOrder');
+const customerOrder = require('../../models/customerOrder');
+const myShopWallet = require('../../models/myShopWallet');
+const vendorWallet = require('../../models/vendorWallet');
 class orderControllers {
   payment_check = async (id) => {
     try {
-      const order = await custOrderModel.findById(id);
+      const order = await customerOrder.findById(id);
       if (order.payment_status === 'unpaid') {
-        await custOrderModel.findByIdAndUpdate(id, {
+        await customerOrder.findByIdAndUpdate(id, {
           delivery_status: 'cancelled',
         });
         await authOrderModel.updateMany(
@@ -52,7 +52,7 @@ class orderControllers {
       }
     }
     try {
-      const order = await custOrderModel.create({
+      const order = await customerOrder.create({
         customerId: userId,
         shippingInfo,
         products: custOrderProduct,
@@ -103,26 +103,26 @@ class orderControllers {
     const { userId } = req.params;
 
     try {
-      const recentOrders = await custOrderModel
+      const recentOrders = await customerOrder
         .find({
           customerId: new ObjectId(userId),
         })
         .limit(5);
 
-      const pendingOrders = await custOrderModel
+      const pendingOrders = await customerOrder
         .find({
           customerId: new ObjectId(userId),
           delivery_status: ' pending',
         })
         .countDocuments();
 
-      const totalOrders = await custOrderModel
+      const totalOrders = await customerOrder
         .find({
           customerId: new ObjectId(userId),
         })
         .countDocuments();
 
-      const cancelledOrders = await custOrderModel
+      const cancelledOrders = await customerOrder
         .find({
           customerId: new ObjectId(userId),
           delivery_status: ' cancelled',
@@ -147,12 +147,12 @@ class orderControllers {
     try {
       let orders = [];
       if (status !== 'all') {
-        orders = await custOrderModel.find({
+        orders = await customerOrder.find({
           customerId: new ObjectId(customerId),
           delivery_status: status,
         });
       } else {
-        orders = await custOrderModel.find({
+        orders = await customerOrder.find({
           customerId: new ObjectId(customerId),
         });
       }
@@ -169,7 +169,7 @@ class orderControllers {
     const { orderId } = req.params;
 
     try {
-      const order = await custOrderModel.findById(orderId);
+      const order = await customerOrder.findById(orderId);
       responseReturn(res, 200, {
         order,
         message: 'Customer order info fetched successfully.',
@@ -190,7 +190,7 @@ class orderControllers {
     try {
       if (searchValue) {
       } else {
-        const orders = await custOrderModel
+        const orders = await customerOrder
           .aggregate([
             {
               $lookup: {
@@ -205,7 +205,7 @@ class orderControllers {
           .limit(perPage)
           .sort({ createdAt: -1 });
 
-        const totalOrders = await custOrderModel.aggregate([
+        const totalOrders = await customerOrder.aggregate([
           {
             $lookup: {
               from: 'authorders',
@@ -229,7 +229,7 @@ class orderControllers {
   get_admin_order = async (req, res) => {
     const { orderId } = req.params;
     try {
-      const order = await custOrderModel.aggregate([
+      const order = await customerOrder.aggregate([
         {
           $match: { _id: new ObjectId(orderId) },
         },
@@ -255,7 +255,7 @@ class orderControllers {
     const { orderId } = req.params;
     const { status } = req.body;
     try {
-      await custOrderModel.findByIdAndUpdate(orderId, {
+      await customerOrder.findByIdAndUpdate(orderId, {
         delivery_status: status,
       });
       responseReturn(res, 200, {
@@ -348,5 +348,50 @@ class orderControllers {
       });
     }
   }; // End of create payment method
+
+  order_confirm = async (req, res) => {
+    const { orderId } = req.params;
+    try {
+      await customerOrder.findByIdAndUpdate(orderId, {
+        payment_status: 'paid',
+      });
+
+      await authOrderModel.updateMany(
+        { orderId: new ObjectId(orderId) },
+        { payment_status: 'paid', delivery_status: 'pending' }
+      );
+      const custOrder = await customerOrder.findById(orderId);
+      const authOrder = await authOrderModel.find({
+        orderId: new ObjectId(orderId),
+      });
+
+      const time = moment(Date.now()).format('l');
+      const splitTime = time.split('/');
+
+      await myShopWallet.create({
+        amount: custOrder.price,
+        month: splitTime[0],
+        year: splitTime[2],
+      });
+
+      for (let i = 0; i < authOrder.length; i++) {
+        await vendorWallet.create({
+          vendorId: authOrder[i].vendorId.toString(),
+          amount: authOrder[i].price,
+          month: splitTime[0],
+          year: splitTime[2],
+        });
+      }
+      responseReturn(res, 200, {
+        message: 'Order confirmed successfully and wallets updated.',
+      });
+    } catch (error) {
+      console.log('Error in order confirmation:', error.message);
+      responseReturn(res, 500, {
+        message:
+          'An error occurred while confirming the order. Please try again later.',
+      });
+    }
+  }; // End of get order confirm method
 }
 module.exports = new orderControllers();
