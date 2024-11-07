@@ -1,4 +1,6 @@
+require('dotenv').config();
 const moment = require('moment');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const {
   mongo: { ObjectId },
 } = require('mongoose');
@@ -323,5 +325,28 @@ class orderControllers {
       console.log(error.message);
     }
   }; // End of vendor update oder status method
+
+  create_payment = async (req, res) => {
+    const { price } = req.body;
+
+    if (!price || isNaN(price) || price <= 0) {
+      responseReturn(res, 400, { error: 'Invalid price provided.' });
+    }
+    try {
+      const payment = await stripe.paymentIntents.create({
+        amount: Math.round(price * 100),
+        currency: 'USD',
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+      responseReturn(res, 200, { clientSecret: payment.client_secret });
+    } catch (error) {
+      console.error('Payment creation failed:', error.message);
+      responseReturn(res, 500, {
+        error: 'Payment processing failed. Please try again later.',
+      });
+    }
+  }; // End of create payment method
 }
 module.exports = new orderControllers();

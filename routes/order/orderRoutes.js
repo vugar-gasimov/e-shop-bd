@@ -16,6 +16,8 @@ router.get(
   orderControllers.get_order_info
 );
 
+router.post('/order/create-payment', orderControllers.create_payment);
+
 // Admin orders
 router.get('/admin/get-orders', orderControllers.get_admin_orders);
 router.get('/admin/get-order/:orderId', orderControllers.get_admin_order);
