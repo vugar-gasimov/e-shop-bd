@@ -13,5 +13,10 @@ router.put(
   authMiddleware,
   paymentController.active_stripe_connect_account
 );
+router.get(
+  '/payment/vendor-payment-details/:vendorId',
+  authMiddleware,
+  paymentController.vendor_payment_details
+);
 
 module.exports = router;

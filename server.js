@@ -9,6 +9,7 @@ const { dbConnect } = require('./utils/db');
 const socket = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);
+
 app.use(
   cors({
     origin: ['http://localhost:3000', 'http://localhost:3001'],
@@ -75,10 +76,6 @@ io.on('connection', (soc) => {
   });
 
   soc.on('send_vendor_message', (msg) => {
-    if (!msg || !msg.receiverId) {
-      console.error('Invalid message or missing receiverId', msg);
-      return;
-    }
     const customer = findCustomer(msg.receiverId);
     if (customer !== undefined) {
       soc.to(customer.socketId).emit('vendor_message', msg);
@@ -86,20 +83,13 @@ io.on('connection', (soc) => {
   });
 
   soc.on('send_customer_message', (msg) => {
-    if (!msg || !msg.receiverId) {
-      console.error('Invalid message or missing receiverId', msg);
-      return;
-    }
     const vendor = findVendor(msg.receiverId);
     if (vendor !== undefined) {
       soc.to(vendor.socketId).emit('customer_message', msg);
     }
   });
+
   soc.on('send_message_admin_vendor', (msg) => {
-    if (!msg || !msg.receiverId) {
-      console.error('Invalid message or missing receiverId', msg);
-      return;
-    }
     const vendor = findVendor(msg.receiverId);
     if (vendor !== undefined) {
       soc.to(vendor.socketId).emit('received_admin_message', msg);
@@ -113,15 +103,15 @@ io.on('connection', (soc) => {
   });
 
   soc.on('add_admin', (adminInfo) => {
-    if (!adminInfo || typeof adminInfo !== 'object') {
-      console.error('Invalid adminInfo received:', adminInfo);
-      return;
+    if (adminInfo) {
+      delete adminInfo.email;
+      delete adminInfo.password;
+      admin = adminInfo;
+      admin.socketId = soc.id;
+      io.emit('activeVendor', allVendors);
+    } else {
+      console.error('Received invalid adminInfo:', adminInfo);
     }
-    delete adminInfo.email;
-    delete adminInfo.password;
-    admin = adminInfo;
-    admin.socketId = soc.id;
-    io.emit('activeVendor', allVendors);
   });
 
   soc.on('disconnect', () => {

@@ -8,7 +8,7 @@ module.exports.authMiddleware = async (req, res, next) => {
       .json({ error: 'Authentication required. Please log in.' });
   } else {
     try {
-      const decodeToken = jwt.verify(accessToken, process.env.SECRET);
+      const decodeToken = await jwt.verify(accessToken, process.env.SECRET);
       req.role = decodeToken.role;
       req.id = decodeToken.id;
       next();
