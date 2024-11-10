@@ -83,9 +83,13 @@ io.on('connection', (soc) => {
   });
 
   soc.on('send_customer_message', (msg) => {
-    const vendor = findVendor(msg.receiverId);
-    if (vendor !== undefined) {
-      soc.to(vendor.socketId).emit('customer_message', msg);
+    if (msg && msg.receiverId) {
+      const vendor = findVendor(msg.receiverId);
+      if (vendor !== undefined) {
+        soc.to(vendor.socketId).emit('customer_message', msg);
+      }
+    } else {
+      console.error('Received invalid msg or missing receiverId:', msg);
     }
   });
 

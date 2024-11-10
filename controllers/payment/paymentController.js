@@ -147,7 +147,7 @@ class paymentController {
         availableAmount = totalAmount - (pendingAmount + withdrawAmount);
       }
 
-      responseReturn(response, 200, {
+      responseReturn(res, 200, {
         totalAmount,
         pendingAmount,
         withdrawAmount,
@@ -160,5 +160,24 @@ class paymentController {
       console.log(error.message);
     }
   }; // End of get vendor payment details method.
+
+  send_withdrawal_request = async (req, res) => {
+    const { amount, vendorId } = req.body;
+    try {
+      const withdrawal = await withdrawRequestModel.create({
+        vendorId,
+        amount: parseInt(amount),
+      });
+      responseReturn(res, 200, {
+        withdrawal,
+        message: 'Withdrawal Request complete Successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+      responseReturn(res, 500, {
+        message: 'Internal Server Error',
+      });
+    }
+  }; // End of post send withdrawal request method.
 }
 module.exports = new paymentController();
