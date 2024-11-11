@@ -134,13 +134,14 @@ app.use(cookieParser());
 app.use('/api/home', require('./routes/home/homeRoutes'));
 app.use('/api', require('./routes/authRoutes'));
 app.use('/api', require('./routes/chatRoutes'));
-app.use('/api', require('./routes/home/cartRoutes'));
+app.use('/api', require('./routes/paymentRoutes'));
 app.use('/api', require('./routes/order/orderRoutes'));
+app.use('/api', require('./routes/home/cartRoutes'));
+app.use('/api', require('./routes/home/customerAuthRoutes'));
 app.use('/api', require('./routes/dashboard/categoryRoutes'));
 app.use('/api', require('./routes/dashboard/productRoutes'));
 app.use('/api', require('./routes/dashboard/vendorRoutes'));
-app.use('/api', require('./routes/home/customerAuthRoutes'));
-app.use('/api', require('./routes/paymentRoutes'));
+app.use('/api', require('./routes/dashboard/dashboardRoutes'));
 
 app.get('/', (req, res) => res.send('My E-Shop Back-end'));
 
