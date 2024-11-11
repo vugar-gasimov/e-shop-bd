@@ -28,5 +28,10 @@ router.get(
   authMiddleware,
   paymentController.get_payment_request
 );
+router.post(
+  '/payment/confirm-request',
+  authMiddleware,
+  paymentController.confirm_payment_request
+);
 
 module.exports = router;

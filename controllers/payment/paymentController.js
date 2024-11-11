@@ -2,6 +2,7 @@ require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { responseReturn } = require('../../utils/response');
+const { ObjectId } = require('mongoose').Types;
 
 const stripeModel = require('../../models/stripeModel');
 const vendorModel = require('../../models/vendorModel');
@@ -196,5 +197,35 @@ class paymentController {
       });
     }
   }; // End of get payment request method
+
+  confirm_payment_request = async (req, res) => {
+    const { paymentId } = req.body;
+    try {
+      const payment = await withdrawRequestModel.find(paymentId);
+      const { stripeId } = await stripeModel.findOne({
+        vendorId: new ObjectId(payment.vendorId),
+      });
+
+      await stripe.transfers.create({
+        amount: payment.amount * 100,
+        currency: payment.currency || 'USD',
+        destination: stripeId,
+      });
+
+      await withdrawRequestModel.findByIdAndUpdate(paymentId, {
+        status: 'success',
+      });
+
+      responseReturn(res, 200, {
+        payment,
+        message: 'Withdrawal Request Confirmed Successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+      responseReturn(res, 500, {
+        message: 'Internal Server Error',
+      });
+    }
+  }; // End of confirm payment request method
 }
 module.exports = new paymentController();
