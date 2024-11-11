@@ -179,5 +179,22 @@ class paymentController {
       });
     }
   }; // End of post send withdrawal request method.
+
+  get_payment_request = async (req, res) => {
+    try {
+      const withdrawalRequest = await withdrawRequestModel.find({
+        status: 'pending',
+      });
+      responseReturn(res, 200, {
+        withdrawalRequest,
+        message: 'Withdrawal Request fetched Successfully.',
+      });
+    } catch (error) {
+      console.log(error.message);
+      responseReturn(res, 500, {
+        message: 'Internal Server Error',
+      });
+    }
+  }; // End of get payment request method
 }
 module.exports = new paymentController();
