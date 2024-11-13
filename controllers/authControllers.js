@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const { createToken } = require('../utils/tokenCreate');
 const vendorCustomersModel = require('../models/chat/vendorCustomersModel');
 const cloudinary = require('cloudinary').v2;
-const { formidable } = require('formidable');
+const formidable = require('formidable');
 
 class authControllers {
   admin_login = async (req, res) => {

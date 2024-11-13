@@ -14,5 +14,6 @@ router.get(
   authMiddleware,
   dashboardController.get_vendor_dashboard
 );
+router.post('/add/banner', authMiddleware, dashboardController.add_banner);
 
 module.exports = router;

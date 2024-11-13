@@ -1,3 +1,5 @@
+const cloudinary = require('cloudinary').v2;
+const formidable = require('formidable');
 const {
   mongo: { ObjectId },
 } = require('mongoose');
@@ -10,6 +12,7 @@ const vendorModel = require('../../models/vendorModel');
 const adminVendorMessage = require('../../models/chat/adminVendorMessage');
 const vendorWallet = require('../../models/vendorWallet');
 const authOrder = require('../../models/authOrder');
+const bannerModel = require('../../models/bannerModel');
 const vendorCustomerMessageModel = require('../../models/chat/vendorCustomerMessageModel');
 
 class dashboardController {
@@ -133,6 +136,42 @@ class dashboardController {
       });
     }
   }; // End of get vendor dashboard data method
+
+  add_banner = async (req, res) => {
+    const form = formidable({ multiples: true });
+    form.parse(req, async (err, field, files) => {
+      const { productId } = field;
+      const { mainBanner } = files;
+
+      cloudinary.config({
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.CLOUD_API_KEY,
+        api_secret: process.env.CLOUD_API_SECRET,
+        secure: true,
+      });
+
+      try {
+        const { slug } = await productModel.findById(productId);
+        const result = await cloudinary.uploader.upload(mainBanner.filepath, {
+          folder: 'banners',
+        });
+        const banner = await bannerModel.create({
+          productId,
+          banner: result.url,
+          link: slug,
+        });
+        responseReturn(res, 200, {
+          message: 'Product banner added successfully.',
+          banner,
+        });
+      } catch (error) {
+        console.log(error.message);
+        responseReturn(res, 500, {
+          message: 'Internal Server Error',
+        });
+      }
+    });
+  }; // End of post add banner image method
 }
 
 module.exports = new dashboardController();
