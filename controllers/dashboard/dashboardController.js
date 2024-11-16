@@ -248,7 +248,28 @@ class dashboardController {
         });
       }
     });
-  };
+  }; // End of update banner by id method.
+
+  get_banners = async (req, res) => {
+    try {
+      const banners = await bannerModel.aggregate([
+        {
+          $sample: {
+            size: 5,
+          },
+        },
+      ]);
+      responseReturn(res, 200, {
+        message: 'Product banners fetched successfully.',
+        banners,
+      });
+    } catch (error) {
+      console.error('Error getting banners:', error.message);
+      responseReturn(res, 500, {
+        message: 'Internal Server Error',
+      });
+    }
+  }; // End of get banners method
 }
 
 module.exports = new dashboardController();
