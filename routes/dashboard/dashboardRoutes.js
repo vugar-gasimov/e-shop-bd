@@ -15,5 +15,15 @@ router.get(
   dashboardController.get_vendor_dashboard
 );
 router.post('/add/banner', authMiddleware, dashboardController.add_banner);
+router.get(
+  '/get/banner/:productId',
+  authMiddleware,
+  dashboardController.get_banner
+);
+router.put(
+  '/update/banner/:bannerId',
+  authMiddleware,
+  dashboardController.update_banner
+);
 
 module.exports = router;

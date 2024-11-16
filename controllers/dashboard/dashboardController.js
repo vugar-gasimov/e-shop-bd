@@ -172,6 +172,83 @@ class dashboardController {
       }
     });
   }; // End of post add banner image method
+
+  get_banner = async (req, res) => {
+    const { productId } = req.params;
+    try {
+      const banner = await bannerModel.findOne({
+        productId: new ObjectId(productId),
+      });
+      responseReturn(res, 200, {
+        message: 'Product banner fetched successfully.',
+        banner,
+      });
+    } catch (error) {
+      console.log(error.message);
+      responseReturn(res, 500, {
+        message: 'Internal Server Error',
+      });
+    }
+  }; // End of get banner by product id method
+
+  update_banner = async (req, res) => {
+    const { bannerId } = req.params;
+    const form = formidable({ multiples: false });
+
+    form.parse(req, async (err, _, files) => {
+      if (err) {
+        console.error('Error parsing form:', err);
+        return responseReturn(res, 400, {
+          message: 'Failed to parse form data.',
+        });
+      }
+
+      const { mainBanner } = files;
+
+      if (!mainBanner) {
+        return responseReturn(res, 400, {
+          message: 'Banner image is required.',
+        });
+      }
+
+      try {
+        cloudinary.config({
+          cloud_name: process.env.CLOUD_NAME,
+          api_key: process.env.CLOUD_API_KEY,
+          api_secret: process.env.CLOUD_API_SECRET,
+          secure: true,
+        });
+
+        let banner = await bannerModel.findById(bannerId);
+        if (!banner) {
+          return responseReturn(res, 404, { message: 'Banner not found.' });
+        }
+        let temp = banner.banner.split('/');
+        temp = temp[temp.length - 1];
+        const imageName = temp.split('.')[0];
+
+        // Delete the existing image from Cloudinary
+        await cloudinary.uploader.destroy(imageName);
+
+        const { url } = await cloudinary.uploader.upload(mainBanner.filepath, {
+          folder: 'banners',
+        });
+
+        await bannerModel.findByIdAndUpdate(bannerId, { banner: url });
+        banner = await bannerModel.findById(bannerId);
+
+        responseReturn(res, 200, {
+          message: 'Product banner updated successfully.',
+          banner,
+        });
+      } catch (error) {
+        console.error('Error updating banner:', error.message);
+        responseReturn(res, 500, {
+          message: 'Internal Server Error',
+        });
+      }
+    });
+  };
 }
 
 module.exports = new dashboardController();
