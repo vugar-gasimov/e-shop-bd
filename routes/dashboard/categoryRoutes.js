@@ -9,4 +9,10 @@ router.post('/add-category', authMiddleware, categoryController.add_category);
 
 router.get('/get-categories', authMiddleware, categoryController.getCategories);
 
+router.put(
+  '/edit/category/:id',
+  authMiddleware,
+  categoryController.editCategory
+);
+
 module.exports = router;

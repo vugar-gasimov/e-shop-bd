@@ -5,7 +5,6 @@ const categoryModel = require('../../models/categoryModel');
 class categoryController {
   add_category = async (req, res) => {
     const form = formidable();
-    // const form = new formidable.IncomingForm();
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -101,6 +100,61 @@ class categoryController {
       console.log(error.message);
     }
   }; // End of get categories method
+
+  editCategory = async (req, res) => {
+    const form = formidable();
+
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        responseReturn(res, 404, { error: 'Something went wrong 404.' });
+      } else {
+        let { name } = fields;
+        let { image } = files;
+        const { id } = req.params;
+
+        name = name.trim();
+        const slug = name.split(' ').join('-');
+
+        try {
+          let result = null;
+          if (image) {
+            cloudinary.config({
+              cloud_name: process.env.CLOUD_NAME,
+              api_key: process.env.CLOUD_API_KEY,
+              api_secret: process.env.CLOUD_API_SECRET,
+              secure: true,
+            });
+            result = await cloudinary.uploader.upload(image.filepath, {
+              folder: 'categories',
+            });
+          }
+          const updateData = {
+            name,
+            slug,
+          };
+          if (result) {
+            updateData.image = result.url;
+          }
+
+          const category = await categoryModel.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+          );
+
+          responseReturn(res, 201, {
+            category,
+            message: 'Category edited successfully.',
+          });
+        } catch (error) {
+          console.error('Error editing category:', error.message);
+          responseReturn(res, 500, {
+            message: 'Internal Server Error',
+          });
+        }
+      }
+    });
+  }; // End of edit category method
 }
 
 module.exports = new categoryController();
