@@ -14,5 +14,6 @@ router.put(
   authMiddleware,
   categoryController.editCategory
 );
+router.delete('/delete/category/:id', categoryController.deleteCategory);
 
 module.exports = router;

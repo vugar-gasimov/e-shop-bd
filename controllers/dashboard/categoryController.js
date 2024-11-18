@@ -155,6 +155,20 @@ class categoryController {
       }
     });
   }; // End of edit category method
+  deleteCategory = async (req, res) => {
+    try {
+      const categoryId = req.params.id;
+      const deleteCategory = await categoryModel.findByIdAndDelete(categoryId);
+      if (!deleteCategory) {
+        console.log(`Category with id ${categoryId} not found`);
+        return res.status(404).json({ message: 'Category not found' });
+      }
+      res.status(200).json({ message: 'Category deleted successfully.' });
+    } catch (error) {
+      console.log(`Error deleting category: ${categoryId}`, error.message);
+      res.status(500).json({ message: 'Internal server Error' });
+    }
+  }; // End of a Delete category method
 }
 
 module.exports = new categoryController();
